@@ -40,7 +40,7 @@ app.post("/login", async(req: Request, res: Response) => {
     res.error("Wrong email or password", null, 400);
   }
 
-  res.success("Login successful", {
+  res.success("Successfully user login", {
     id: user.id,
     name: user.name,
     email: user.email,
@@ -69,7 +69,7 @@ app.post("/register", async(req: Request, res: Response) => {
     res.error("Error registering user", null, 400);
   }
 
-  res.success("User registered");
+  res.success("Successfully user registered");
 });
 
 app.get("/nutrients", async(req: Request, res: Response) => {
@@ -84,7 +84,7 @@ app.get("/nutrients", async(req: Request, res: Response) => {
     res.error("Date is required", null, 400);
   }
 
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
       token: headers.authorization,
     }
@@ -112,7 +112,7 @@ app.post("/analyze", async(req: Request, res: Response) => {
     res.error("Food name, carbohydrate, proteins, fat and calories are required", null, 400);
   }
 
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
       token: headers.authorization,
     }
