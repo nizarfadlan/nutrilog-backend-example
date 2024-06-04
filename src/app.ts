@@ -1,6 +1,4 @@
 import express from "express";
-import multer from "multer";
-import * as fs from "fs/promises";
 import type { Request, Response } from "express";
 import { errorHandler } from "./middlewares/errors";
 import { prisma } from "./db";

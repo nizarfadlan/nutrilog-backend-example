@@ -1,16 +1,19 @@
 {
   "compilerOptions": {
-      "module": "commonjs",
-      "esModuleInterop": true,
-      "target": "es6",
-      "moduleResolution": "node",
-      "sourceMap": true,
-      "outDir": "dist",
-      "rootDir": "./src",
-      "typeRoots": [
-        "./node_modules/@types",
-        "./src/types"
-      ],
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es6",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist",
+		"baseUrl": ".",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "paths": {
+			"@/*": ["src/*"]
+		}
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"],
