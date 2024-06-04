@@ -9,12 +9,15 @@
     "lint": "eslint . --ext .ts",
     "ts:check": "tsc --project tsconfig.json",
     "start": "ts-node-dev src/app.ts",
+    "add-build": "git add dist",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed"
   },
   "pre-commit": [
     "lint",
-    "ts:check"
+    "ts:check",
+    "build",
+    "add-build"
   ],
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
