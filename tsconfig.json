@@ -5,8 +5,15 @@
       "target": "es6",
       "moduleResolution": "node",
       "sourceMap": true,
-      "outDir": "dist"
+      "outDir": "dist",
+      "rootDir": "./src",
+      "typeRoots": [
+        "./node_modules/@types",
+        "./src/types"
+      ],
   },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"],
   "lib": [
       "es2015"
   ]

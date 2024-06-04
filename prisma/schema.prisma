@@ -1,0 +1,50 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  password  String
+  token     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  nutrition Nutrition[]
+
+  @@unique([token, email])
+}
+
+model Nutrition {
+  id           String   @id @default(dbgenerated("(concat('NU_', gen_random_uuid()))::TEXT"))
+  userId       String   @map("user_id")
+  foodName     String   @map("food_name")
+  calories     Float
+  proteins     Float
+  carbohydrate Float
+  fat          Float
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Food {
+  id           String   @id @default(dbgenerated("(concat('FO_', gen_random_uuid()))::TEXT"))
+  foodId       String  @map("food_id")   @unique
+  foodName     String   @map("food_name")
+  calories     Float
+  proteins     Float
+  carbohydrate Float
+  fat          Float
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+}
