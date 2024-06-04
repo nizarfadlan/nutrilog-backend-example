@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
+    "postinstall": "prisma generate",
     "build": "rimraf dist && tsc",
     "main": "dist/app.js",
     "lint": "eslint .",
