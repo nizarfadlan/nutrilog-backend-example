@@ -19,6 +19,7 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   nutrition Nutrition[]
+  @@unique([email, token])
 }
 
 model Nutrition {
