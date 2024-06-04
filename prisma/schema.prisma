@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
@@ -14,12 +13,10 @@ model User {
   name      String
   email     String  @unique
   password  String
-  token     String  @unique
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   nutrition Nutrition[]
-  @@unique([email, token])
 }
 
 model Nutrition {

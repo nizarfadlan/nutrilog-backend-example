@@ -3,10 +3,12 @@ import type { Request, Response } from "express";
 import { errorHandler } from "./middlewares/errors";
 import { prisma } from "./db";
 import bcrypt from "bcrypt";
+import { authHandler } from "./middlewares/auth";
+import { PASSWORD_HASH_SALT_ROUNDS } from "./constant";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const port = 3000;
-const PASSWORD_HASH_SALT_ROUNDS = 10;
 
 app.use(express.json());
 app.use(express.static("public"));
@@ -40,11 +42,16 @@ app.post("/login", async(req: Request, res: Response) => {
     res.error("Wrong email or password", null, 400);
   }
 
+  const payload = {
+    id: user.id,
+  }
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+
   res.success("Successfully user login", {
     id: user.id,
     name: user.name,
     email: user.email,
-    token: user.token
+    token
   });
 });
 
@@ -55,13 +62,11 @@ app.post("/register", async(req: Request, res: Response) => {
     res.error("Name, email and password are required", null, 400);
   }
 
-  const token = Math.random().toString(36).substring(2);
   const user = await prisma.user.create({
     data: {
       name,
       email,
-      password: await bcrypt.hash(password, PASSWORD_HASH_SALT_ROUNDS),
-      token
+      password: await bcrypt.hash(password, PASSWORD_HASH_SALT_ROUNDS)
     }
   });
 
@@ -74,25 +79,14 @@ app.post("/register", async(req: Request, res: Response) => {
 
 app.get("/nutrients", async(req: Request, res: Response) => {
   const { date } = req.query;
-  const headers = req.headers;
-
-  if (!headers.authorization) {
-    res.error("Unauthorized", null, 401);
-  }
 
   if (!date) {
     res.error("Date is required", null, 400);
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      token: headers.authorization,
-    }
-  });
-
   const nutrients = await prisma.nutrition.findMany({
     where: {
-      userId: user.id,
+      userId: req.user.id,
       createdAt: new Date(date.toString())
     }
   });
@@ -100,27 +94,16 @@ app.get("/nutrients", async(req: Request, res: Response) => {
   res.success("Nutrients retrieved", nutrients);
 });
 
-app.post("/analyze", async(req: Request, res: Response) => {
+app.post("/analyze", authHandler, async(req: Request, res: Response) => {
   const { food_name, carbohydrate, proteins, fat, calories } = req.body;
-  const headers = req.headers;
-
-  if (!headers.authorization) {
-    res.error("Unauthorized", null, 401);
-  }
 
   if (!food_name || !carbohydrate || !proteins || !fat || !calories) {
     res.error("Food name, carbohydrate, proteins, fat and calories are required", null, 400);
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      token: headers.authorization,
-    }
-  });
-
   const nutrition = await prisma.nutrition.create({
     data: {
-      userId: user.id,
+      userId: req.user.id,
       foodName: food_name,
       carbohydrate,
       proteins,
