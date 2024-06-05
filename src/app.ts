@@ -45,7 +45,7 @@ app.post("/login", async(req: Request, res: Response) => {
   const payload = {
     id: user.id,
   }
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+  const token = jwt.sign(payload, process.env.JWT_SECRET);
 
   res.success("Successfully user login", {
     id: user.id,
