@@ -16,9 +16,11 @@ const express_1 = __importDefault(require("express"));
 const errors_1 = require("./middlewares/errors");
 const db_1 = require("./db");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const auth_1 = require("./middlewares/auth");
+const constant_1 = require("./constant");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const app = (0, express_1.default)();
 const port = 3000;
-const PASSWORD_HASH_SALT_ROUNDS = 10;
 app.use(express_1.default.json());
 app.use(express_1.default.static("public"));
 app.use(errors_1.errorHandler);
@@ -43,11 +45,15 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     if (!isValid) {
         res.error("Wrong email or password", null, 400);
     }
-    res.success("Login successful", {
+    const payload = {
+        id: user.id,
+    };
+    const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET);
+    res.success("Successfully user login", {
         id: user.id,
         name: user.name,
         email: user.email,
-        token: user.token
+        token
     });
 }));
 app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -55,59 +61,46 @@ app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     if (name === "" || email === "" || password === "") {
         res.error("Name, email and password are required", null, 400);
     }
-    const token = Math.random().toString(36).substring(2);
     const user = yield db_1.prisma.user.create({
         data: {
             name,
             email,
-            password: yield bcrypt_1.default.hash(password, PASSWORD_HASH_SALT_ROUNDS),
-            token
+            password: yield bcrypt_1.default.hash(password, constant_1.PASSWORD_HASH_SALT_ROUNDS)
         }
     });
     if (!user) {
         res.error("Error registering user", null, 400);
     }
-    res.success("User registered");
+    res.success("Successfully user registered");
 }));
-app.get("/nutrients", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/nutrients", auth_1.authHandler, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { date } = req.query;
-    const headers = req.headers;
-    if (!headers.authorization) {
-        res.error("Unauthorized", null, 401);
-    }
     if (!date) {
         res.error("Date is required", null, 400);
     }
-    const user = yield db_1.prisma.user.findFirst({
-        where: {
-            token: headers.authorization,
-        }
-    });
+    const startOfDay = new Date(date.toString());
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
     const nutrients = yield db_1.prisma.nutrition.findMany({
         where: {
-            userId: user.id,
-            createdAt: new Date(date.toString())
+            userId: req.user.id,
+            createdAt: {
+                gte: startOfDay,
+                lt: endOfDay
+            }
         }
     });
     res.success("Nutrients retrieved", nutrients);
 }));
-app.post("/analyze", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/analyze", auth_1.authHandler, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { food_name, carbohydrate, proteins, fat, calories } = req.body;
-    const headers = req.headers;
-    if (!headers.authorization) {
-        res.error("Unauthorized", null, 401);
-    }
     if (!food_name || !carbohydrate || !proteins || !fat || !calories) {
         res.error("Food name, carbohydrate, proteins, fat and calories are required", null, 400);
     }
-    const user = yield db_1.prisma.user.findFirst({
-        where: {
-            token: headers.authorization,
-        }
-    });
     const nutrition = yield db_1.prisma.nutrition.create({
         data: {
-            userId: user.id,
+            userId: req.user.id,
             foodName: food_name,
             carbohydrate,
             proteins,
