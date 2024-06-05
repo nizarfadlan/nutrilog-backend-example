@@ -84,10 +84,19 @@ app.get("/nutrients", authHandler, async(req: Request, res: Response) => {
     res.error("Date is required", null, 400);
   }
 
+  const startOfDay = new Date(date.toString());
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(startOfDay);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+
   const nutrients = await prisma.nutrition.findMany({
     where: {
       userId: req.user.id,
-      createdAt: new Date(date.toString())
+      createdAt: {
+        gte: startOfDay,
+        lt: endOfDay
+      }
     }
   });
 
