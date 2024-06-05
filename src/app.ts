@@ -77,7 +77,7 @@ app.post("/register", async(req: Request, res: Response) => {
   res.success("Successfully user registered");
 });
 
-app.get("/nutrients", async(req: Request, res: Response) => {
+app.get("/nutrients", authHandler, async(req: Request, res: Response) => {
   const { date } = req.query;
 
   if (!date) {
