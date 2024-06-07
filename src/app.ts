@@ -58,30 +58,33 @@ app.post("/login", async(req: Request, res: Response) => {
 });
 
 app.post("/register", async(req: Request, res: Response) => {
-  const { name, email, password, gender } = req.body;
+  const { name, email, password, gender, age } = req.body;
 
   if (!name || !email || !password || !gender) {
     return res.error("Name, email, password and gender are required", null, 400);
-  }
-
-  if (password.length < 8) {
+  } else if (password.length < 8) {
     return res.error("Password must be at least 8 characters", null, 400);
-  }
-
-  if (!Object.values(Gender).includes(gender)) {
+  } else if (!Object.values(Gender).includes(gender)) {
     return res.error("Invalid gender value");
+  } else if (age.length < 0) {
+    return res.error("Age must be greater than 0", null, 400);
   }
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: await bcrypt.hash(password, PASSWORD_HASH_SALT_ROUNDS),
-      gender
+  try {
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: await bcrypt.hash(password, PASSWORD_HASH_SALT_ROUNDS),
+        gender,
+        age
+      }
+    });
+  } catch (error) {
+    if (error.code === "P2002") {
+      return res.error("Email already exists", null, 400);
     }
-  });
 
-  if (!user) {
     return res.error("Error registering user", null, 400);
   }
 
