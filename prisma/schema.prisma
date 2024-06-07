@@ -13,6 +13,7 @@ model User {
   name      String
   email     String  @unique
   password  String
+  gender    Gender
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -43,4 +44,9 @@ model Food {
   fat          Float
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }

@@ -19,6 +19,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const auth_1 = require("./middlewares/auth");
 const constant_1 = require("./constant");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const client_1 = require("@prisma/client");
 const app = (0, express_1.default)();
 const port = 3000;
 app.use(express_1.default.json());
@@ -30,8 +31,8 @@ app.get("/", (req, res) => {
 });
 app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
-    if (email === "" || password === "") {
-        res.error("Email and password are required", null, 400);
+    if (!email || !password) {
+        return res.error("Email and password are required", null, 400);
     }
     const user = yield db_1.prisma.user.findUnique({
         where: {
@@ -39,11 +40,11 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
     });
     if (!user) {
-        res.error("Wrong email or password", null, 400);
+        return res.error("Wrong email or password", null, 400);
     }
     const isValid = yield bcrypt_1.default.compare(password, user.password);
     if (!isValid) {
-        res.error("Wrong email or password", null, 400);
+        return res.error("Wrong email or password", null, 400);
     }
     const payload = {
         id: user.id,
@@ -53,30 +54,38 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         id: user.id,
         name: user.name,
         email: user.email,
+        gender: user.gender,
         token
     });
 }));
 app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password } = req.body;
-    if (name === "" || email === "" || password === "") {
-        res.error("Name, email and password are required", null, 400);
+    const { name, email, password, gender } = req.body;
+    if (!name || !email || !password || !gender) {
+        return res.error("Name, email, password and gender are required", null, 400);
+    }
+    if (password.length < 8) {
+        return res.error("Password must be at least 8 characters", null, 400);
+    }
+    if (!Object.values(client_1.Gender).includes(gender)) {
+        return res.error("Invalid gender value");
     }
     const user = yield db_1.prisma.user.create({
         data: {
             name,
             email,
-            password: yield bcrypt_1.default.hash(password, constant_1.PASSWORD_HASH_SALT_ROUNDS)
+            password: yield bcrypt_1.default.hash(password, constant_1.PASSWORD_HASH_SALT_ROUNDS),
+            gender
         }
     });
     if (!user) {
-        res.error("Error registering user", null, 400);
+        return res.error("Error registering user", null, 400);
     }
     res.success("Successfully user registered");
 }));
 app.get("/nutrients", auth_1.authHandler, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { date } = req.query;
     if (!date) {
-        res.error("Date is required", null, 400);
+        return res.error("Date is required", null, 400);
     }
     const startOfDay = new Date(date.toString());
     startOfDay.setHours(0, 0, 0, 0);
@@ -96,7 +105,7 @@ app.get("/nutrients", auth_1.authHandler, (req, res) => __awaiter(void 0, void 0
 app.post("/analyze", auth_1.authHandler, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { food_name, carbohydrate, proteins, fat, calories } = req.body;
     if (!food_name || !carbohydrate || !proteins || !fat || !calories) {
-        res.error("Food name, carbohydrate, proteins, fat and calories are required", null, 400);
+        return res.error("Food name, carbohydrate, proteins, fat and calories are required", null, 400);
     }
     const nutrition = yield db_1.prisma.nutrition.create({
         data: {
@@ -110,21 +119,6 @@ app.post("/analyze", auth_1.authHandler, (req, res) => __awaiter(void 0, void 0,
     });
     res.success("Nutrition analyzed", nutrition);
 }));
-// Change the route
-// const upload = multer({ dest: "uploads/" });
-// app.post("/predict", upload.single("image"), async (req: Request, res: Response) => {
-//   const filePath = req.file?.path;
-//   if (!filePath) {
-//     return res.status(400).send("No file uploaded");
-//   }
-//   try {
-//     const imageBuffer = await fs.readFile(filePath);
-//     await fs.unlink(filePath);
-//   } catch (error) {
-//     console.error("Error processing image:", error);
-//     res.status(500).send("Error processing image");
-//   }
-// });
 app.listen(port, () => {
     return console.log(`http://localhost:${port}`);
 });
