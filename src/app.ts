@@ -53,6 +53,7 @@ app.post("/login", async(req: Request, res: Response) => {
     name: user.name,
     email: user.email,
     gender: user.gender,
+    age: user.age,
     token
   });
 });

@@ -55,6 +55,7 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         name: user.name,
         email: user.email,
         gender: user.gender,
+        age: user.age,
         token
     });
 }));
