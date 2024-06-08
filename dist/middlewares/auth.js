@@ -10,7 +10,7 @@ dotenv_1.default.config();
 const authHandler = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-        return res.error("Unauthorized", null, 401);
+        return res.error("Unauthorized", 401);
     }
     const token = authHeader.split(" ")[1];
     try {
@@ -20,10 +20,10 @@ const authHandler = (req, res, next) => {
     }
     catch (err) {
         if (err instanceof jsonwebtoken_1.default.JsonWebTokenError) {
-            return res.error("Token expired", null, 401);
+            return res.error("Token expired", 401);
         }
         else {
-            return res.error("Internal server error", null, 500);
+            return res.error("Internal server error", 500);
         }
     }
 };

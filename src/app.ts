@@ -24,7 +24,7 @@ app.post("/login", async(req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.error("Email and password are required", null, 400);
+    return res.error("Email and password are required", 400);
   }
 
   const user = await prisma.user.findUnique({
@@ -34,13 +34,13 @@ app.post("/login", async(req: Request, res: Response) => {
   });
 
   if (!user) {
-    return res.error("Wrong email or password", null, 400);
+    return res.error("Wrong email or password", 400);
   }
 
   const isValid = await bcrypt.compare(password, user.password)
 
   if (!isValid) {
-    return res.error("Wrong email or password", null, 400);
+    return res.error("Wrong email or password", 400);
   }
 
   const payload = {
@@ -62,13 +62,13 @@ app.post("/register", async(req: Request, res: Response) => {
   const { name, email, password, gender, age } = req.body;
 
   if (!name || !email || !password || !gender || !age) {
-    return res.error("Name, email, password and gender are required", null, 400);
+    return res.error("Name, email, password and gender are required", 400);
   } else if (password.length < 8) {
-    return res.error("Password must be at least 8 characters", null, 400);
+    return res.error("Password must be at least 8 characters", 400);
   } else if (!Object.values(Gender).includes(gender)) {
     return res.error("Invalid gender value");
   } else if (age.length < 0) {
-    return res.error("Age must be greater than 0", null, 400);
+    return res.error("Age must be greater than 0", 400);
   }
 
   try {
@@ -83,10 +83,10 @@ app.post("/register", async(req: Request, res: Response) => {
     });
   } catch (error) {
     if (error.code === "P2002") {
-      return res.error("Email already exists", null, 400);
+      return res.error("Email already exists", 400);
     }
 
-    return res.error("Error registering user", null, 400);
+    return res.error("Error registering user", 400);
   }
 
   res.success("Successfully user registered");
@@ -96,7 +96,7 @@ app.get("/nutrients", authHandler, async(req: Request, res: Response) => {
   const { date } = req.query;
 
   if (!date) {
-    return res.error("Date is required", null, 400);
+    return res.error("Date is required", 400);
   }
 
   const startOfDay = new Date(date.toString());
@@ -121,7 +121,7 @@ app.post("/analyze", authHandler, async(req: Request, res: Response) => {
   const { food_name, carbohydrate, proteins, fat, calories } = req.body;
 
   if (!food_name || !carbohydrate || !proteins || !fat || !calories) {
-    return res.error("Food name, carbohydrate, proteins, fat and calories are required", null, 400);
+    return res.error("Food name, carbohydrate, proteins, fat and calories are required", 400);
   }
 
   const nutrition = await prisma.nutrition.create({

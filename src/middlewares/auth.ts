@@ -7,7 +7,7 @@ dotenv.config();
 export const authHandler = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.error("Unauthorized", null, 401);
+    return res.error("Unauthorized", 401);
   }
 
   const token = authHeader.split(" ")[1];
@@ -18,9 +18,9 @@ export const authHandler = (req: Request, res: Response, next: NextFunction) => 
     next();
   } catch (err) {
     if (err instanceof jwt.JsonWebTokenError) {
-      return res.error("Token expired", null, 401);
+      return res.error("Token expired", 401);
     } else {
-      return res.error("Internal server error", null, 500);
+      return res.error("Internal server error", 500);
     }
   }
 };

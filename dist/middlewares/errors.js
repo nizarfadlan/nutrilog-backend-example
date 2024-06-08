@@ -10,11 +10,10 @@ const errorHandler = (req, res, next) => {
             data
         });
     };
-    res.error = (message, data = {}, statusCode = 400) => {
+    res.error = (message, statusCode = 400) => {
         res.status(statusCode).json({
             status: "error",
-            message,
-            data
+            message
         });
     };
     next();
