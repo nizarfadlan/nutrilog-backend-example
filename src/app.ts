@@ -61,7 +61,7 @@ app.post("/login", async(req: Request, res: Response) => {
 app.post("/register", async(req: Request, res: Response) => {
   const { name, email, password, gender, age } = req.body;
 
-  if (!name || !email || !password || !gender) {
+  if (!name || !email || !password || !gender || !age) {
     return res.error("Name, email, password and gender are required", null, 400);
   } else if (password.length < 8) {
     return res.error("Password must be at least 8 characters", null, 400);
