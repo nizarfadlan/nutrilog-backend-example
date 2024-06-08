@@ -54,7 +54,7 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         id: user.id,
         name: user.name,
         email: user.email,
-        gender: user.gender,
+        gender: user.gender.toLowerCase(),
         age: user.age,
         token
     });
@@ -67,7 +67,7 @@ app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     else if (password.length < 8) {
         return res.error("Password must be at least 8 characters", 400);
     }
-    else if (!Object.values(client_1.Gender).includes(gender)) {
+    else if (!Object.values(client_1.Gender).includes(gender.toUpperCase())) {
         return res.error("Invalid gender value");
     }
     else if (age.length < 0) {
@@ -79,7 +79,7 @@ app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 name,
                 email,
                 password: yield bcrypt_1.default.hash(password, constant_1.PASSWORD_HASH_SALT_ROUNDS),
-                gender,
+                gender: gender.toUpperCase(),
                 age
             }
         });

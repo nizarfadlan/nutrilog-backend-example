@@ -52,7 +52,7 @@ app.post("/login", async(req: Request, res: Response) => {
     id: user.id,
     name: user.name,
     email: user.email,
-    gender: user.gender,
+    gender: user.gender.toLowerCase(),
     age: user.age,
     token
   });
@@ -65,7 +65,7 @@ app.post("/register", async(req: Request, res: Response) => {
     return res.error("Name, email, password and gender are required", 400);
   } else if (password.length < 8) {
     return res.error("Password must be at least 8 characters", 400);
-  } else if (!Object.values(Gender).includes(gender)) {
+  } else if (!Object.values(Gender).includes(gender.toUpperCase())) {
     return res.error("Invalid gender value");
   } else if (age.length < 0) {
     return res.error("Age must be greater than 0", 400);
@@ -77,7 +77,7 @@ app.post("/register", async(req: Request, res: Response) => {
         name,
         email,
         password: await bcrypt.hash(password, PASSWORD_HASH_SALT_ROUNDS),
-        gender,
+        gender: gender.toUpperCase(),
         age
       }
     });
