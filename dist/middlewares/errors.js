@@ -3,7 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
 const errorHandler = (req, res, next) => {
     res.header("content-type", "application/json");
-    res.success = (message, data = {}, statusCode = 200) => {
+    res.success = (message, data, statusCode = 200) => {
+        if (!data) {
+            return res.status(statusCode).json({
+                status: "success",
+                message
+            });
+        }
         res.status(statusCode).json({
             status: "success",
             message,
