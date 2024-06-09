@@ -12,7 +12,9 @@ export const authHandler = (req: Request, res: Response, next: NextFunction) => 
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as Request["user"];
+    // The ignoreExpiration option is used to ignore the expiration of the token
+    // This is useful when you want to check if the token is valid but don't want to throw an error if it's expired
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true }) as Request["user"];
     req.user = decoded;
 
     next();
