@@ -14,7 +14,9 @@ const authHandler = (req, res, next) => {
     }
     const token = authHeader.split(" ")[1];
     try {
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        // The ignoreExpiration option is used to ignore the expiration of the token
+        // This is useful when you want to check if the token is valid but don't want to throw an error if it's expired
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
         req.user = decoded;
         next();
     }
